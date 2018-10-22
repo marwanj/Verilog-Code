@@ -1,11 +1,10 @@
 module Bubble_Sort #(parameter buff_size=128,parameter word_size = 32)(A,B,En, Ld, clk, rst,done,count);
-output reg [word_size-1:0] A,B [0:buff_size-1];
+output reg [32-1:0] A [0:128-1];
+output reg [32-1:0] B [0:128-1];
 input En, Ld, clk, rst;
-parameter N = 8;
 output reg done;
+parameter N=buff_size;
 parameter a1 = 8, a2 = 1, a3 = 8, a4 = 1, a5 = 8, a6 = 1, a7 = 8, a8 = 1;
-wire [3:0] A1 = A[1], A2 = A[2], A3 = A[3], A4 = A[4];
-wire [3:0] A5 = A[5], A6 = A[6], A7 = A[7], A8 = A[8];
 parameter S_idle = 0, S_run = 1,s_categorize=2;
 reg [31: 0] i, j,k,m;
 reg [31: 0] minval,locmin;
@@ -60,7 +59,7 @@ end
 end
 else if (Ld) begin 
 i <= 0; j <= 0; m<=0 ; k<=0 ;
-A[1] <= a1; A[2] <= a2; A[3] <= a3; A[4] <= a4;
+A[0]<=9;A[1] <= a1; A[2] <= a2; A[3] <= a3; A[4] <= a4;
 A[5] <= a5; A[6] <= a6; A[7] <= a7; A[8] <= a8;
 for (resettervar	=	9;	resettervar	<=	buff_size -1;	resettervar	=	resettervar+1)
 A[resettervar]	<=	resettervar;
