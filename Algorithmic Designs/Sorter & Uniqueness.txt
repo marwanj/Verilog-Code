@@ -13,3 +13,27 @@
 // A = [–7, –7, –7, –5, –5, –5, 1, 1, 3, 3, 3, 6|]
 //DONE
 //THE ALGORITHIM will divide the working set into two. One that is sorted and another that is not.
+int N=Length(A);
+int temp=A[0]
+for (i=0;i<N,i++)
+{
+for (j=i;j<N,j++)
+{
+if (A[j]<temp)
+temp=A[j];
+
+}
+A[i]=temp;
+}
+// A heap structure would give us the solution in O(n) ;however, the structure involved is quite expensive to fabricate.
+// Therefore we will settle with making a normal One
+// We then categorize the entries :
+
+int j=0;
+for (int i=1;i<n-1;i++)
+{
+if (A[i] != A[i+1] && A[i] != A[i-1])
+{
+    B[j]=A[i];
+}
+}
