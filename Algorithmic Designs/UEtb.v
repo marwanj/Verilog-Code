@@ -3,7 +3,7 @@ wire [31:0] A [0:127];
 wire [31:0] B [0:127];
 wire done,count;
 reg En,Ld,clk,rst;
-Bubble_Sort Bubbly (128,32)(A,B,En, Ld, clk, rst,done,count);
+UE Bubbly (A,B,En, Ld, clk, rst,done,count);
 
 initial
 begin

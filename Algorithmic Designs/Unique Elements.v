@@ -1,4 +1,4 @@
-module Bubble_Sort #(parameter buff_size=128,parameter word_size = 32)(A,B,En, Ld, clk, rst,done,count);
+module UE #(parameter buff_size=128,parameter word_size = 32)(A,B,En, Ld, clk, rst,done,count);
 output reg [32-1:0] A [0:128-1];
 output reg [32-1:0] B [0:128-1];
 input En, Ld, clk, rst;
