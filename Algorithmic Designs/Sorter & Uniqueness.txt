@@ -27,7 +27,7 @@ A[i]=temp;
 }
 // A heap structure would give us the solution in O(n) ;however, the structure involved is quite expensive to fabricate.
 // Therefore we will settle with making a normal One
-// We then categorize the entries :
+// We then categorize the entries as such:
 
 int j=0;
 for (int i=1;i<n-1;i++)
