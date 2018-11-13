@@ -2,11 +2,11 @@ module Control_Unit (
 Load_R0, Load_R1,
 Load_R2, Load_R3,
 Load_R4, Load_R5,
-Load_R6, Load_R7,
-Load_PC,Load_PC1,Load_PC2, Inc_PC,
+Load_R6, Load_R7,Load_Immediate,
+Load_PC,Load_IR1,Load_IR2, Inc_PC,
 Sel_Bus_1_Mux, Sel_Bus_2_Mux,
-Load_IR, Load_Add_R, Load_Reg_Y, Load_Reg_Z,Load_PC1,Load_PC2,
-write, instruction, zero, clk, rst);
+Load_IR, Load_Add_R, Load_Reg_Y, Load_Reg_Z,Load_IR1,Load_IR2,
+write, instruction,opcode,destsrc, zero, clk, rst);
 parameter word_size = 8, op_size = 8, state_size = 4;
 parameter src_size = 4, dest_size = 4, Sel1_size = 4, Sel2_size = 2;
 // State Codes
@@ -65,7 +65,7 @@ output Load_R0, Load_R1, Load_R2, Load_R3,Load_R4, Load_R5,
 Load_R6, Load_R7;
 output Load_PC, Inc_PC;
 output [Sel1_size-1: 0] Sel_Bus_1_Mux;
-output Load_IR, Load_Add_R,Load_PC1,Load_PC2;
+output Load_IR, Load_Add_R,Load_IR1,Load_IR2;
 output Load_Reg_Y, Load_Reg_Z;
 output [Sel2_size-1: 0] Sel_Bus_2_Mux;
 output write;
@@ -75,15 +75,15 @@ input clk, rst;
 // Datapath and State Register Variables
 reg [state_size-1: 0] state, next_state;
 reg Load_R0, Load_R1, Load_R2, Load_R3, Load_PC, Inc_PC;
-reg Load_IR, Load_Add_R, Load_Reg_Y,Load_PC1,Load_PC2;
+reg Load_IR, Load_Add_R, Load_Reg_Y,Load_IR1,Load_IR2;
 reg Sel_ALU, Sel_Bus_1, Sel_Mem;
 reg Sel_R0, Sel_R1, Sel_R2, Sel_R3,Sel_R4, Sel_R5 ,Sel_R6 , Sel_R7,Sel_PC;
 reg Load_Reg_Z, write;
 reg err_flag;
 // Structural connections
-wire [op_size-1: 0] opcode = instruction [word_size-1: word_size - op_size];
-wire [src_size-1: 0] src = instruction [src_size + dest_size -1: dest_size];
-wire [dest_size-1: 0] dest = instruction [dest_size -1: 0];
+wire [op_size-1: 0] opcode = opcode [word_size-1: word_size - op_size];
+wire [src_size-1: 0] src = destsrc [src_size + dest_size -1: dest_size];
+wire [dest_size-1: 0] dest = destsrc [dest_size -1: 0];
 // Datapath mux selectors
 assign Sel_Bus_1_Mux[Sel1_size-1: 0] = Sel_R0 ? 0:
                                         Sel_R1 ? 1:
@@ -109,7 +109,7 @@ always @ (state or opcode or src or dest or zero) begin: Output_and_next_state
     Sel_R0 = 0; Sel_R1 = 0; Sel_R2 = 0; Sel_R3 = 0;Sel_R4 = 0; Sel_R5 = 0; Sel_R6 = 0; Sel_R7 = 0; Sel_PC = 0;
     Load_R0 = 0; Load_R1 = 0; Load_R2 = 0; Load_R3 = 0;Load_R4 = 0; 
     Load_R5 = 0; Load_R6 = 0; Load_R7 = 0; Load_PC = 0;
-    Load_IR = 0; Load_Add_R = 0; Load_Reg_Y = 0; Load_Reg_Z = 0;Load_PC1 = 0;Load_PC2 = 0;
+    Load_IR = 0; Load_Add_R = 0; Load_Reg_Y = 0; Load_Reg_Z = 0;Load_IR1 = 0;Load_IR2 = 0;
     Inc_PC = 0;
     Sel_Bus_1 = 0;
     Sel_ALU = 0;
@@ -133,14 +133,16 @@ always @ (state or opcode or src or dest or zero) begin: Output_and_next_state
             Inc_PC = 1;
         end
         S_dec: begin
-            case (opcode)
+            case (instruction)
                 NOP: 
                     next state = S fetch1;
                 ADD, SUB, AND,INC,DEC,MOD,SLT,SGT,NAND,NOR,XOR: 
                     begin
-                    Load_PC1 = 1;
+                    Load_IR1 = 1;
                     next_state = S_ex1 ;
                     Sel_Bus_1 = 1;
+                    Sel_PC=1;
+                    Load_Add_R = 1;
                     end //Arithmetic
                 NOT: 
                     begin
@@ -209,9 +211,13 @@ always @ (state or opcode or src or dest or zero) begin: Output_and_next_state
         endcase // Opcode
     end //Decode
         S_ex1:  begin
-                    Sel_Bus_1 = 1;
-                    Sel_PC = 1;
                     next_state=S_ex2;
+                    Sel_Mem=1;
+                    Load_Add_R=1;
+                  //  Inc_PC=1;
+
+                    Sel_Bus_1 = 1;
+                    Inc_PC = 1;
                     Load_Reg_Y = 1;
                     case (src) // Select ALU src reg
                         R0: Sel_R0 = 1;
@@ -226,6 +232,7 @@ always @ (state or opcode or src or dest or zero) begin: Output_and_next_state
                     endcase
                 end // S_ex1
          S_ex2:  begin
+                    
                     next_state=S_fet1;
                     Load_Reg_Z=1;
                     Sel_ALU=1;
@@ -242,10 +249,6 @@ always @ (state or opcode or src or dest or zero) begin: Output_and_next_state
                     default: err_flag = 1;
                     endcase//dest
                 end // S_ex2
-
-
-
-
 
         S_rd1:  begin
                     next_state=S_rd2;
