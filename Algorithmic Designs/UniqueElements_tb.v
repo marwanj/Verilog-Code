@@ -1,3 +1,4 @@
+// Test Bench for the unique elements module
 module UEtb ;
 wire [31:0] A [0:127];
 wire [31:0] B [0:127];
